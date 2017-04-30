@@ -21,8 +21,8 @@
         <StackPanel Grid.Column="0" Grid.Row="0">
             <Label  Content="Functions" FontSize="18" Foreground="Coral" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="10,20,10,5"/>
             
-            <RadioButton x:Name="SinRadioButton" Content="A*Sin(B * 1/x)" Foreground="CornflowerBlue" Margin="20,5,10,3" FontSize="14"  IsChecked="True"/>
-            <RadioButton x:Name="CosRadioButton" Content="A*Cos(B * 1/x)" Foreground="CornflowerBlue" Margin="20,0,10,5" FontSize="14" />
+            <RadioButton x:Name="SinRadioButton" Content="A*Sin(B * 1/x + C)" Foreground="CornflowerBlue" Margin="20,5,10,3" FontSize="14"  IsChecked="True"/>
+            <RadioButton x:Name="CosRadioButton" Content="A*Cos(B * 1/x + C)" Foreground="CornflowerBlue" Margin="20,0,10,5" FontSize="14" />
 
             <Label  Content="Parameters" FontSize="17" Foreground="Coral" HorizontalAlignment="Center" Margin="10,15,10,0"/>
 
@@ -38,7 +38,14 @@
                 <Label  Content="B - " FontSize="15" Foreground="CornflowerBlue" Margin="20,0,0,0"/>
                 <TextBox x:Name="BtextBox" Height="27" Width="80" TextWrapping="Wrap" Text="1"/>
             </StackPanel>
-      
+
+            <Label  Content="Delay" FontSize="13" Foreground="Blue"  Margin="20,10,10,1" Padding="0,0,0,0"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,0">
+                <Label  Content="C - " FontSize="15" Foreground="CornflowerBlue" Margin="20,0,0,0"/>
+                <TextBox x:Name="CtextBox" Height="27" Width="80" TextWrapping="Wrap" Text="0"/>
+            </StackPanel>
+            
+
         </StackPanel>
         <StackPanel Grid.Column="1" Grid.Row="1" Orientation="Horizontal">
             <Button x:Name="PlotButton" Content="Plot" Grid.Column="1" Grid.Row="1" Margin="20,0,0,0" VerticalAlignment="Center" Width="110" Height="40" FontSize="15" Foreground="CornflowerBlue" Background="AliceBlue" Click="PlotButton_Click"/>

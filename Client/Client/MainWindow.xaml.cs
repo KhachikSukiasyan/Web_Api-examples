@@ -56,28 +56,30 @@ namespace Client
         {
             double coefA;
             double coefB;
+            double coefC;
 
-            if (string.IsNullOrEmpty(AtextBox.Text) && string.IsNullOrEmpty(BtextBox.Text))
+            if (string.IsNullOrEmpty(AtextBox.Text) && string.IsNullOrEmpty(BtextBox.Text) && string.IsNullOrEmpty(CtextBox.Text))
             {
                 AtextBox.Text = "1";
                 BtextBox.Text = "1";
+                CtextBox.Text = "0";
 
                 if ((bool)SinRadioButton.IsChecked)
-                    Draw(Function.Sin, 1, 1);
+                    Draw(Function.Sin, 1, 1, 0);
                 else
-                    Draw(Function.Cos, 1, 1);
+                    Draw(Function.Cos, 1, 1, 0);
             }
             else
             {
-                if (double.TryParse(AtextBox.Text, out coefA) && double.TryParse(BtextBox.Text, out coefB))
+                if (double.TryParse(AtextBox.Text, out coefA) && double.TryParse(BtextBox.Text, out coefB) && double.TryParse(CtextBox.Text, out coefC))
                 {
                     if ((bool)SinRadioButton.IsChecked)
                     {
-                        Draw(Function.Sin, coefA, coefB);
+                        Draw(Function.Sin, coefA, coefB, coefC);
                     }
                     else
                     {
-                        Draw(Function.Cos, coefA, coefB);
+                        Draw(Function.Cos, coefA, coefB, coefC);
                     }
 
                 }
@@ -93,9 +95,7 @@ namespace Client
             {
                 MainCanvas.Children.Remove(item);
             }
-            
         }
-
 
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -142,12 +142,12 @@ namespace Client
         }
 
 
-        private async void Draw(Function func, double coefA, double coefB)
+        private async void Draw(Function func, double coefA, double coefB,double coefC)
         {
             HttpResponseMessage message;
             string funcName = (func == Function.Sin) ? "Sin" : "Cos";
             JavaScriptSerializer jss = new JavaScriptSerializer();
-            Uri address = new Uri(String.Format("http://localhost:50633/{0}/{1}/{2}", funcName, coefA, coefB));
+            Uri address = new Uri(String.Format("http://localhost:50633/{0}/{1}/{2}/{3}", funcName, coefA, coefB, coefC));
 
             //client.BaseAddress = address;
             client.DefaultRequestHeaders.Accept.Clear();
@@ -157,8 +157,6 @@ namespace Client
             message = await client.GetAsync(address);
             string responseText = await message.Content.ReadAsStringAsync();
             List<Point> result = jss.Deserialize<List<Point>>(responseText);
-
-
 
 
             polyline = new Polyline { Stroke = Brushes.Black, StrokeThickness = 1 };

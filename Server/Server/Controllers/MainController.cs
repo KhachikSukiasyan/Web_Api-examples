@@ -13,7 +13,7 @@ namespace Server.Controllers
     public class MainController : ApiController
     {
         // GET: api/Main
-        public List<Point> Get(string funcName, double A, double B)
+        public List<Point> Get(string funcName, double A, double B,double C)
         {
             List<Point> result = new List<Point>();
 
@@ -31,7 +31,7 @@ namespace Server.Controllers
                 for (double i = algA; i < algB; i += algDx)
                 {
                     tempPoint.X = i;
-                    tempPoint.Y = Math.Sin(i * 1 / A * syntheticX) * B * syntheticY;
+                    tempPoint.Y = Math.Sin((i + C) * 1 / B * syntheticX) * A * syntheticY;
                     result.Add(tempPoint);
                 }
             }
@@ -41,7 +41,7 @@ namespace Server.Controllers
                  for (double i = algA; i < algB; i += algDx)
                  {
                     tempPoint.X = i;
-                    tempPoint.Y = Math.Cos(i * 1 / A * syntheticX) * B * syntheticY;
+                    tempPoint.Y = Math.Cos((i + C) * 1 / B * syntheticX) * A * syntheticY;
                     result.Add(tempPoint);
                  }
              }
