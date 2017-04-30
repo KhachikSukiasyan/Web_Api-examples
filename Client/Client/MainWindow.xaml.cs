@@ -14,7 +14,11 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.IO;
 using System.Drawing.Drawing2D;
-
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
+using System.Web.Script.Serialization;
 
 namespace Client
 {
@@ -30,7 +34,7 @@ namespace Client
     }
     public partial class MainWindow : Window
     {
-        
+        static HttpClient client = new HttpClient();
         Line Xasis = new Line();
         Line Yasis = new Line();
 
@@ -137,45 +141,80 @@ namespace Client
             }
         }
 
-        private void Draw(Function func, double coefA, double coefB)
+
+        private async void Draw(Function func, double coefA, double coefB)
         {
-            double syntheticX = 0.8;
-            double syntheticY = 6;
+            HttpResponseMessage message;
+            string funcName = (func == Function.Sin) ? "Sin" : "Cos";
+            JavaScriptSerializer jss = new JavaScriptSerializer();
+            Uri address = new Uri(String.Format("http://localhost:50633/{0}/{1}/{2}", funcName, coefA, coefB));
+
+            //client.BaseAddress = address;
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+
+            message = await client.GetAsync(address);
+            string responseText = await message.Content.ReadAsStringAsync();
+            List<Point> result = jss.Deserialize<List<Point>>(responseText);
+
+
+
 
             polyline = new Polyline { Stroke = Brushes.Black, StrokeThickness = 1 };
-
             double realA = -MainCanvas.ActualWidth / 2;
             double realB = MainCanvas.ActualWidth / 2;
-            double algA = -60;
-            double algB = 60;
-            double algDx = (algB - algA) / 1000;
+            double scaleX = (realB - realA) / 120;
 
-            double scaleX = (realB - realA) / (algB - algA);
-
-
-            Point tempPoint = new Point();
-            if (func == Function.Sin)
+            for (int i = 0; i < result.Count; i++)
             {
-                for (double i = algA; i < algB; i += algDx)
-                {
-                    tempPoint.X = realA + scaleX * i + MainCanvas.ActualWidth;
-                    tempPoint.Y = Math.Sin(i * 1 / coefA * syntheticX) * coefB * syntheticY + MainCanvas.ActualHeight / 2;
-
-                    polyline.Points.Add(tempPoint);
-                }
-            }
-            else
-            for (double i = algA; i < algB; i += algDx)
-            {
-                tempPoint.X = realA + scaleX * i + MainCanvas.ActualWidth;
-                tempPoint.Y = Math.Cos(i * 1/coefA * syntheticX) * coefB * syntheticY + MainCanvas.ActualHeight / 2;
-
-                polyline.Points.Add(tempPoint);
+                result[i] = new Point(realA + scaleX * result[i].X + MainCanvas.ActualWidth, result[i].Y + MainCanvas.ActualHeight / 2);
+                polyline.Points.Add(result[i]);
             }
             MainCanvas.Children.Add(polyline);
             addedLines.Add(polyline);
-
         }
+
+
+        //private void Draw(Function func, double coefA, double coefB)
+        //{
+        //    double syntheticX = 0.8;
+        //    double syntheticY = 6;
+
+        //    polyline = new Polyline { Stroke = Brushes.Black, StrokeThickness = 1 };
+
+        //    double realA = -MainCanvas.ActualWidth / 2;
+        //    double realB = MainCanvas.ActualWidth / 2;
+        //    double algA = -60;
+        //    double algB = 60;
+        //    double algDx = (algB - algA) / 1000;
+
+        //    double scaleX = (realB - realA) / (algB - algA);
+
+
+        //    Point tempPoint = new Point();
+        //    if (func == Function.Sin)
+        //    {
+        //        for (double i = algA; i < algB; i += algDx)
+        //        {
+        //            tempPoint.X = realA + scaleX * i + MainCanvas.ActualWidth;
+        //            tempPoint.Y = Math.Sin(i * 1 / coefA * syntheticX) * coefB * syntheticY + MainCanvas.ActualHeight / 2;
+
+        //            polyline.Points.Add(tempPoint);
+        //        }
+        //    }
+        //    else
+        //        for (double i = algA; i < algB; i += algDx)
+        //        {
+        //            tempPoint.X = realA + scaleX * i + MainCanvas.ActualWidth;
+        //            tempPoint.Y = Math.Cos(i * 1 / coefA * syntheticX) * coefB * syntheticY + MainCanvas.ActualHeight / 2;
+
+        //            polyline.Points.Add(tempPoint);
+        //        }
+        //    MainCanvas.Children.Add(polyline);
+        //    addedLines.Add(polyline);
+
+        //}
 
 
 
