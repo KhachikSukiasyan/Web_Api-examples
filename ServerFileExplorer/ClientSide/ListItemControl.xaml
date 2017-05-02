@@ -1,0 +1,23 @@
+﻿<UserControl x:Class="ClientSide.ListItemControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ClientSide"
+             mc:Ignorable="d" 
+             d:DesignHeight="25" d:DesignWidth="250">
+
+    <UserControl.Resources>
+        <local:ListItemControl x:Key="ListItem" ></local:ListItemControl>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="25"></ColumnDefinition>
+            <ColumnDefinition Width="100*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+
+        <Image Name="itemImage" Grid.Column="0" Source="{Binding icon}"></Image>
+        <TextBlock Name="itemText"  Grid.Column="1" Text="{Binding Source={StaticResource ListItem}, Path=text}" Padding="2,3,0,0" ></TextBlock>
+    </Grid>
+</UserControl>

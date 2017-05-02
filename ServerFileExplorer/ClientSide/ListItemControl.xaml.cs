@@ -16,23 +16,17 @@ using System.Windows.Shapes;
 namespace ClientSide
 {
     /// <summary>
-    /// Логика взаимодействия для MainWindow.xaml
+    /// Логика взаимодействия для ListItemControl.xaml
     /// </summary>
-    /// 
-
-    //public static class ListItem
-    //{
-    //    public static Image image;
-    //    public static string text;
-    //}
-
-    public partial class MainWindow : Window
+    public partial class ListItemControl : UserControl
     {
-        public MainWindow()
+        public Image icon { get; set; }
+        public string text { get; set; }
+
+
+        public ListItemControl()
         {
             InitializeComponent();
         }
-
-
     }
 }

@@ -4,9 +4,57 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ClientSide"
+        xmlns:control = "clr-namespace:ClientSide" 
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" Height="400" Width="650" Background="LightSkyBlue">
+    
+
+
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="55"></RowDefinition>
+            <RowDefinition Height="3" ></RowDefinition>
+            <RowDefinition Height="40"></RowDefinition>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="180"></ColumnDefinition>
+            <ColumnDefinition Width="3"></ColumnDefinition>
+            <ColumnDefinition></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" Orientation="Horizontal">
+            <TextBlock Width="170" Height="55" HorizontalAlignment="Left" Foreground="Blue"  FontSize="16" Padding="16" >Enter directory name:</TextBlock>
+            <TextBox Width="350" Margin="10" FontSize="15" Padding="4">root</TextBox>
+        </StackPanel>
+
+        <TextBlock  Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="1" Background="AliceBlue" Margin="20,0,3,0" HorizontalAlignment="Stretch"></TextBlock>
+
+        <Grid Grid.Column="0" Grid.Row="2" Grid.RowSpan="2" >
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="20"></RowDefinition>
+                <RowDefinition Height="100*"/>
+            </Grid.RowDefinitions>
+
+                <Label Grid.Row="0" Height="20" FontSize="13" Foreground="Blue" Padding="0" Margin="0"  HorizontalContentAlignment="Center">Browser</Label>
+
+            
+            <ListBox Margin="3,0,3,3"  Grid.Row="1" >
+                <ListBoxItem Height="25">
+                    <control:ListItemControl  Background="Aqua" Margin="0,0,0,0"/>
+                </ListBoxItem>
+                <ListBoxItem Height="25">
+                    <control:ListItemControl Background="Aqua" Margin="0,0,0,0"/>
+                </ListBoxItem>
+                <ListBoxItem Height="25">aaa</ListBoxItem>
+                <ListBoxItem Height="25">aaa</ListBoxItem>
+            </ListBox>
+            
+        </Grid>
+
+        <GridSplitter  Grid.Column="1"  Grid.Row="1" Grid.RowSpan="3" Background="AliceBlue" Margin="0,0,0,0" HorizontalAlignment="Stretch"></GridSplitter>
+
+
     </Grid>
 </Window>
