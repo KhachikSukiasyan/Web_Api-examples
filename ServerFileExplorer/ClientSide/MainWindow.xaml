@@ -7,8 +7,6 @@
         xmlns:control = "clr-namespace:ClientSide" 
         mc:Ignorable="d"
         Title="MainWindow" Height="400" Width="650" Background="LightSkyBlue">
-    
-
 
     <Grid>
         <Grid.RowDefinitions>
@@ -24,12 +22,15 @@
         </Grid.ColumnDefinitions>
 
         <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" Orientation="Horizontal">
-            <TextBlock Width="170" Height="55" HorizontalAlignment="Left" Foreground="Blue"  FontSize="16" Padding="16" >Enter directory name:</TextBlock>
-            <TextBox Width="350" Margin="10" FontSize="15" Padding="4">root</TextBox>
+            <Button Name="CreateFile"  Margin="65,10,10,10" Width="90" Foreground="Blue" Background="White" Click="CreateFile_Click" >Create new file</Button>
+            <Button Name="CreateFolder"  Margin="10,10,10,10" Width="90" Foreground="Blue" Background="White" FontSize="10" Click="CreateFolder_Click" >Create new folder</Button>
+            <Button Name="Update"  Margin="10,10,10,10" Width="90" Foreground="Blue" Background="White" Click="Update_Click" >Update </Button>
+            <Button Name="Delete"  Margin="10,10,10,10" Width="90" Foreground="Blue" Background="White" Click="Delete_Click" >Delete </Button>
+            <Button Name="GoToRoot"  Margin="60,10,10,10" Width="70" Foreground="Blue" Background="GreenYellow" HorizontalAlignment="Right">Go to root</Button>
         </StackPanel>
 
         <TextBlock  Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="1" Background="AliceBlue" Margin="20,0,3,0" HorizontalAlignment="Stretch"></TextBlock>
-
+        
         <Grid Grid.Column="0" Grid.Row="2" Grid.RowSpan="2" >
 
             <Grid.RowDefinitions>
@@ -39,22 +40,25 @@
 
                 <Label Grid.Row="0" Height="20" FontSize="13" Foreground="Blue" Padding="0" Margin="0"  HorizontalContentAlignment="Center">Browser</Label>
 
-            
-            <ListBox Margin="3,0,3,3"  Grid.Row="1" >
-                <ListBoxItem Height="25">
-                    <control:ListItemControl  Background="Aqua" Margin="0,0,0,0"/>
-                </ListBoxItem>
-                <ListBoxItem Height="25">
-                    <control:ListItemControl Background="Aqua" Margin="0,0,0,0"/>
-                </ListBoxItem>
-                <ListBoxItem Height="25">aaa</ListBoxItem>
-                <ListBoxItem Height="25">aaa</ListBoxItem>
+            <ListBox Name="MainListBox" Margin="3,0,3,3"  Grid.Row="1" SelectionChanged="MainListBox_SelectionChanged" >
+
             </ListBox>
             
         </Grid>
 
         <GridSplitter  Grid.Column="1"  Grid.Row="1" Grid.RowSpan="3" Background="AliceBlue" Margin="0,0,0,0" HorizontalAlignment="Stretch"></GridSplitter>
 
+        <Grid Grid.Column="2" Grid.Row="2" Grid.RowSpan="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="25"></RowDefinition>
+                <RowDefinition></RowDefinition>
+            </Grid.RowDefinitions>
 
+            <Label Grid.Row="0" FontSize="17" Foreground="Blue" Padding="0" Margin="0,2,0,0" HorizontalContentAlignment="Center">Content of the file</Label>
+            <TextBox Name="MainTextBox" Grid.Row="1" Margin="10,5,10,10"></TextBox>
+        </Grid>
+        
+        
+        
     </Grid>
 </Window>

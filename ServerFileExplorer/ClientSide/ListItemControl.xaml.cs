@@ -18,15 +18,29 @@ namespace ClientSide
     /// <summary>
     /// Логика взаимодействия для ListItemControl.xaml
     /// </summary>
+    /// 
+
+    public enum TypeOfItem
+    {
+        File,
+        Folder
+    }
     public partial class ListItemControl : UserControl
     {
-        public Image icon { get; set; }
-        public string text { get; set; }
-
-
+        public TypeOfItem typeOfItem { get; set; }
+        public string fullPath { get; set; }
         public ListItemControl()
         {
+            
             InitializeComponent();
+          //  icon.Source = new BitmapImage(new Uri($"/Resources/folder.png", UriKind.Relative));
         }
+
+        //protected override void OnInitialized(EventArgs e)
+        //{
+        //    base.OnInitialized(e);
+        //    itemImage.Source = new BitmapImage(new Uri("//application:,,,/Resources/folder.png", UriKind.Relative)); 
+
+        //}
     }
 }

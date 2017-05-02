@@ -7,9 +7,10 @@
              mc:Ignorable="d" 
              d:DesignHeight="25" d:DesignWidth="250">
 
-    <UserControl.Resources>
+  <!--  <UserControl.Resources>
         <local:ListItemControl x:Key="ListItem" ></local:ListItemControl>
     </UserControl.Resources>
+    -->
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -17,7 +18,9 @@
             <ColumnDefinition Width="100*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <Image Name="itemImage" Grid.Column="0" Source="{Binding icon}"></Image>
-        <TextBlock Name="itemText"  Grid.Column="1" Text="{Binding Source={StaticResource ListItem}, Path=text}" Padding="2,3,0,0" ></TextBlock>
+        <Image Name="itemImage" Grid.Column="0" Margin="3,4,3,4" Stretch="Fill" ></Image>
+        <!--Source="{Binding icon}"-->
+        <TextBlock Name="itemText"  Grid.Column="1"  Padding="2,3,0,0" >aaaaaaaaaaaaaaaaaaaa</TextBlock>
+        <!--Text="{Binding Source={StaticResource ListItem}, Path=text}"-->
     </Grid>
 </UserControl>
