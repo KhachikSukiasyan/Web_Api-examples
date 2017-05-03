@@ -21,12 +21,12 @@
             <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" Orientation="Horizontal">
-            <Button Name="CreateFile"  Margin="65,10,10,10" Width="90" Foreground="Blue" Background="White" Click="CreateFile_Click" >Create new file</Button>
+        <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Name="CreateFile"  Margin="10,10,10,10" Width="90" Foreground="Blue" Background="White" Click="CreateFile_Click" >Create new file</Button>
             <Button Name="CreateFolder"  Margin="10,10,10,10" Width="90" Foreground="Blue" Background="White" FontSize="10" Click="CreateFolder_Click" >Create new folder</Button>
             <Button Name="Update"  Margin="10,10,10,10" Width="90" Foreground="Blue" Background="White" Click="Update_Click" >Update </Button>
             <Button Name="Delete"  Margin="10,10,10,10" Width="90" Foreground="Blue" Background="White" Click="Delete_Click" >Delete </Button>
-            <Button Name="GoToRoot"  Margin="60,10,10,10" Width="70" Foreground="Blue" Background="GreenYellow" HorizontalAlignment="Right">Go to root</Button>
+            
         </StackPanel>
 
         <TextBlock  Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="1" Background="AliceBlue" Margin="20,0,3,0" HorizontalAlignment="Stretch"></TextBlock>

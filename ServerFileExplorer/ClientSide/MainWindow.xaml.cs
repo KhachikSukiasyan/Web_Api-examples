@@ -107,18 +107,18 @@ namespace ClientSide
             return path;
         }
         //Button handlers
-        private void CreateFile_Click(object sender, RoutedEventArgs e)
+        private  void CreateFile_Click(object sender, RoutedEventArgs e)
         {
             if (MainListBox.SelectedItem != null)
             {
-               string selectedItemPath = ClickHelper();
+                string selectedItemPath = ClickHelper();
+                FileStream fStream =  File.Create(selectedItemPath + '\\' + "text.txt");
+                fStream.Close();
 
-               File.Create(selectedItemPath + '\\' + "text.txt");
-
-               isDeletedOrCreated = true;
-               MainListBox.Items.Clear();
-               DirectoryInfo root = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.GetDirectories("root")[0];
-               Explore(root);
+                isDeletedOrCreated = true;
+                MainListBox.Items.Clear();
+                DirectoryInfo root = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.GetDirectories("root")[0];
+                Explore(root);
             }
             else
             {
@@ -126,13 +126,21 @@ namespace ClientSide
             }
         }
 
-        private void CreateFolder_Click(object sender, RoutedEventArgs e)
+        private  void CreateFolder_Click(object sender, RoutedEventArgs e)
         {
             if (MainListBox.SelectedItem != null)
-            {
+            {           
                 string selectedItemPath = ClickHelper();
-                if (!Directory.Exists(selectedItemPath))
-                    Directory.CreateDirectory(selectedItemPath);
+
+                DirectoryInfo dir = new DirectoryInfo(selectedItemPath);
+
+                dir.CreateSubdirectory("newDirectory");
+
+                isDeletedOrCreated = true;
+                MainListBox.Items.Clear();
+                DirectoryInfo root = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.GetDirectories("root")[0];
+                Explore(root);
+
             }
             else
             {
@@ -141,7 +149,7 @@ namespace ClientSide
 
         }
 
-        private void Update_Click(object sender, RoutedEventArgs e)
+        private  void Update_Click(object sender, RoutedEventArgs e)
         {
             if (MainListBox.SelectedItem != null)
             {
@@ -151,11 +159,13 @@ namespace ClientSide
 
                 if (currentItem.typeOfItem == TypeOfItem.File)
                 {
-                    FileStream file = new FileStream(path, FileMode.Open);
-                    StreamWriter writer = new StreamWriter(file);
-                    writer.Write(MainTextBox.Text);
-                    writer.Close();
-                    file.Close();
+                    
+                   FileStream file = new FileStream(path, FileMode.Open);
+                   StreamWriter writer = new StreamWriter(file);
+                   writer.Write(MainTextBox.Text);
+                   writer.Close();
+                   file.Close();
+                    
                 }
                 else
                 {
@@ -168,7 +178,7 @@ namespace ClientSide
             }
         }
 
-        private void Delete_Click(object sender, RoutedEventArgs e)
+        private  void Delete_Click(object sender, RoutedEventArgs e)
         {
 
             ListBoxItem item = MainListBox.SelectedItem as ListBoxItem;
@@ -181,16 +191,23 @@ namespace ClientSide
             }
             else
             {
-                Directory.Delete(path);
+                if (path == Directory.GetParent(Directory.GetCurrentDirectory()).Parent.GetDirectories("root")[0].FullName)
+                {
+                    MessageBox.Show("You cant delete the root");
+                    return;
+                }
+
+                Directory.Delete(path,true);
             }
 
             isDeletedOrCreated = true;
             MainListBox.Items.Clear();
             DirectoryInfo root = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.GetDirectories("root")[0];
             Explore(root);
+
         }
 
-        private void MainListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private  void MainListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
             if (isDeletedOrCreated)
@@ -209,14 +226,13 @@ namespace ClientSide
 
             string path = (item.Content as ListItemControl).fullPath;
 
-
             if (currentItem.typeOfItem == TypeOfItem.File)
             {
-                FileStream file = new FileStream(path, FileMode.Open);
-                StreamReader reader = new StreamReader(file);
-                MainTextBox.Text = reader.ReadToEnd();
-                reader.Close();
-                file.Close();
+                    FileStream file = new FileStream(path, FileMode.Open);
+                    StreamReader reader = new StreamReader(file);
+                    MainTextBox.Text = reader.ReadToEnd();
+                    reader.Close();
+                    file.Close();
             }
             else
             {
