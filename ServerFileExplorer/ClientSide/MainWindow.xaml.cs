@@ -13,6 +13,12 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.IO;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
+using System.Web.Script.Serialization;
+using ClientSide.Models;
 
 namespace ClientSide
 {
@@ -24,198 +30,217 @@ namespace ClientSide
 
     public partial class MainWindow : Window
     {
+        static HttpClient client = new HttpClient();
         bool isDeletedOrCreated = false;
+        static JavaScriptSerializer jss = new JavaScriptSerializer();
+        string[] UnorderedResult;
+        ListBoxItem lbi;
+        ListItemControl lic;
 
         public MainWindow()
         {
             InitializeComponent();
         }
-        protected override void OnInitialized(EventArgs e)
+
+        protected async override void OnInitialized(EventArgs e)
         {
             base.OnInitialized(e);
 
-            DirectoryInfo root = Directory.GetParent( Directory.GetCurrentDirectory()).Parent.GetDirectories("root")[0];
-          //  string wanted_path = System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(System.IO.Directory.GetCurrentDirectory()));
-
-            Explore(root);
-
-        }
-
-        private void Explore(DirectoryInfo root)
-        {
-            ExploreHelper(root, 0);
-        }
-
-        private void ExploreHelper(DirectoryInfo root,int marginMultiplyer)
-        {
-            ListBoxItem lbi = new ListBoxItem();
-            ListItemControl lic = new ListItemControl();
+            //-------------------- Adding root folder on start
+            lbi = new ListBoxItem();
+            lic = new ListItemControl();
 
             lbi.Content = lic;
             lic.itemImage.Source = new BitmapImage(new Uri("//application:,,,/Resources/folder.png", UriKind.Relative));
-            lic.itemText.Text = root.Name;
+            lic.itemText.Text = "root";
             lic.typeOfItem = TypeOfItem.Folder;
-            lic.fullPath = root.FullName;
-
-            lic.Margin = new Thickness(lic.Margin.Left + marginMultiplyer * 10, lic.Margin.Top, lic.Margin.Right, lic.Margin.Bottom);
+            
             MainListBox.Items.Add(lbi);
 
-           
-            FileInfo[] files = (from g in root.GetFiles() where g.Extension == ".txt" select g).ToArray();
+            //--------------------Sending GET query
+            HttpResponseMessage message;
+            Uri address = new Uri("http://localhost:50446/Main");
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            for (int i = 0; i < files.Length; i++)
+            message = await client.GetAsync(address);
+            string responseText = await message.Content.ReadAsStringAsync();
+
+            UnorderedResult = jss.Deserialize<string[]>(responseText);
+
+            foreach (string item in UnorderedResult)
             {
-                lbi = new ListBoxItem();
-                lic = new ListItemControl();
+                 lbi = new ListBoxItem();
+                 lic = new ListItemControl();
+                
+                lic.itemText.Text = item.Split('\\').Last();
+                lic.Margin = new Thickness(lic.Margin.Left + Deepness(item) * 10, lic.Margin.Top, lic.Margin.Right, lic.Margin.Bottom);
+                lic.relativePath = item;
+                if (IsFile(item))
+                {
+                    lic.itemImage.Source = new BitmapImage(new Uri("//application:,,,/Resources/text.png", UriKind.Relative));
+                    lic.typeOfItem = TypeOfItem.File;
+                }
+                else
+                {
+                    lic.itemImage.Source = new BitmapImage(new Uri("//application:,,,/Resources/folder.png", UriKind.Relative));
+                    lic.typeOfItem = TypeOfItem.Folder;
+                }
                 lbi.Content = lic;
-
-                lic.Margin = new Thickness(lic.Margin.Left + (marginMultiplyer + 1) * 10, lic.Margin.Top, lic.Margin.Right, lic.Margin.Bottom);
-                lic.itemImage.Source = new BitmapImage(new Uri("//application:,,,/Resources/text.png", UriKind.Relative));
-                lic.itemText.Text = files[i].Name;
-                lic.typeOfItem = TypeOfItem.File;
-                lic.fullPath = files[i].FullName;
-
                 MainListBox.Items.Add(lbi);
-            }
+            } 
 
-
-            DirectoryInfo[] dirs = root.GetDirectories();
-            for (int i = 0; i < dirs.Length; i++)
-            {
-                ExploreHelper(dirs[i], marginMultiplyer + 1);
-            }
+            //--------------------
         }
+
+        private bool IsFile(string path)
+        {
+            string fileOrFolderName = path.Split('\\').Last();
+            int index = fileOrFolderName.LastIndexOf('.');
+            if (index != -1)
+            {
+                int fileformatLength = fileOrFolderName.Split('.').Last().Length;
+                if (fileformatLength == 2 || fileformatLength == 3 || fileformatLength == 4)
+                    return true;
+            }
+            return false;
+        }
+
+        private int Deepness(string path)
+        {
+            return path.Split('\\').Length;
+        }
+
+
 
         //NOTE: some button handlers use this
-        private string ClickHelper()
-        {
-            ListBoxItem item = MainListBox.SelectedItem as ListBoxItem;
-            ListItemControl currentItem = item.Content as ListItemControl;
+        //private string ClickHelper()
+        //{
+        //    ListBoxItem item = MainListBox.SelectedItem as ListBoxItem;
+        //    ListItemControl currentItem = item.Content as ListItemControl;
 
-            string path = (item.Content as ListItemControl).fullPath;
+        //    string path = (item.Content as ListItemControl).fullPath;
 
-            if (currentItem.typeOfItem == TypeOfItem.File)
-            {
-                int i;
-                for (i = path.Length - 1; i > 0; i--)
-                {
-                    if (path[i] == '\\')
-                        break;
-                }
-                path = path.Substring(0, i);
-            }
-            return path;
-        }
+        //    if (currentItem.typeOfItem == TypeOfItem.File)
+        //    {
+        //        int i;
+        //        for (i = path.Length - 1; i > 0; i--)
+        //        {
+        //            if (path[i] == '\\')
+        //                break;
+        //        }
+        //        path = path.Substring(0, i);
+        //    }
+        //    return path;
+        //}
         //Button handlers
         private  void CreateFile_Click(object sender, RoutedEventArgs e)
         {
-            if (MainListBox.SelectedItem != null)
-            {
-                string selectedItemPath = ClickHelper();
-                FileStream fStream =  File.Create(selectedItemPath + '\\' + "text.txt");
-                fStream.Close();
+            //if (MainListBox.SelectedItem != null)
+            //{
+            //    string selectedItemPath = ClickHelper();
+            //    FileStream fStream =  File.Create(selectedItemPath + '\\' + "text.txt");
+            //    fStream.Close();
 
-                isDeletedOrCreated = true;
-                MainListBox.Items.Clear();
-                DirectoryInfo root = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.GetDirectories("root")[0];
-                Explore(root);
-            }
-            else
-            {
-                MessageBox.Show("Select directory in Browser");
-            }
+            //    isDeletedOrCreated = true;
+            //    MainListBox.Items.Clear();
+            //    DirectoryInfo root = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.GetDirectories("root")[0];
+            // //   Explore(root);
+            //}
+            //else
+            //{
+            //    MessageBox.Show("Select directory in Browser");
+            //}
         }
 
         private  void CreateFolder_Click(object sender, RoutedEventArgs e)
         {
-            if (MainListBox.SelectedItem != null)
-            {           
-                string selectedItemPath = ClickHelper();
+            //if (MainListBox.SelectedItem != null)
+            //{           
+            //  //  string selectedItemPath = ClickHelper();
 
-                DirectoryInfo dir = new DirectoryInfo(selectedItemPath);
+            //    DirectoryInfo dir = new DirectoryInfo(selectedItemPath);
 
-                dir.CreateSubdirectory("newDirectory");
+            //    dir.CreateSubdirectory("newDirectory");
 
-                isDeletedOrCreated = true;
-                MainListBox.Items.Clear();
-                DirectoryInfo root = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.GetDirectories("root")[0];
-                Explore(root);
+            //    isDeletedOrCreated = true;
+            //    MainListBox.Items.Clear();
+            //    DirectoryInfo root = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.GetDirectories("root")[0];
+            //  //  Explore(root);
 
-            }
-            else
-            {
-                MessageBox.Show("Select anything in Browser");
-            }
+            //}
+            //else
+            //{
+            //    MessageBox.Show("Select anything in Browser");
+            //}
 
         }
 
         private  void Update_Click(object sender, RoutedEventArgs e)
         {
-            if (MainListBox.SelectedItem != null)
-            {
-                ListBoxItem item = MainListBox.SelectedItem as ListBoxItem;
-                ListItemControl currentItem = item.Content as ListItemControl;
-                string path = (item.Content as ListItemControl).fullPath;
+            //if (MainListBox.SelectedItem != null)
+            //{
+            //    ListBoxItem item = MainListBox.SelectedItem as ListBoxItem;
+            //    ListItemControl currentItem = item.Content as ListItemControl;
+            //  //  string path = (item.Content as ListItemControl).fullPath;
 
-                if (currentItem.typeOfItem == TypeOfItem.File)
-                {
+            //    if (currentItem.typeOfItem == TypeOfItem.File)
+            //    {
                     
-                   FileStream file = new FileStream(path, FileMode.Open);
-                   StreamWriter writer = new StreamWriter(file);
-                   writer.Write(MainTextBox.Text);
-                   writer.Close();
-                   file.Close();
+            //       FileStream file = new FileStream(path, FileMode.Open);
+            //       StreamWriter writer = new StreamWriter(file);
+            //       writer.Write(MainTextBox.Text);
+            //       writer.Close();
+            //       file.Close();
                     
-                }
-                else
-                {
-                    MessageBox.Show("Select file in Browser");
-                }
-            }
-            else
-            {
-                MessageBox.Show("Select anything in Browser");
-            }
+            //    }
+            //    else
+            //    {
+            //        MessageBox.Show("Select file in Browser");
+            //    }
+            //}
+            //else
+            //{
+            //    MessageBox.Show("Select anything in Browser");
+            //}
         }
 
         private  void Delete_Click(object sender, RoutedEventArgs e)
         {
 
-            ListBoxItem item = MainListBox.SelectedItem as ListBoxItem;
-            ListItemControl currentItem = item.Content as ListItemControl;
-            string path = (item.Content as ListItemControl).fullPath;
+            //ListBoxItem item = MainListBox.SelectedItem as ListBoxItem;
+            //ListItemControl currentItem = item.Content as ListItemControl;
+            //string path = (item.Content as ListItemControl).fullPath;
 
-            if (currentItem.typeOfItem == TypeOfItem.File)
-            {
-                File.Delete(path);
-            }
-            else
-            {
-                if (path == Directory.GetParent(Directory.GetCurrentDirectory()).Parent.GetDirectories("root")[0].FullName)
-                {
-                    MessageBox.Show("You cant delete the root");
-                    return;
-                }
+            //if (currentItem.typeOfItem == TypeOfItem.File)
+            //{
+            //    File.Delete(path);
+            //}
+            //else
+            //{
+            //    if (path == Directory.GetParent(Directory.GetCurrentDirectory()).Parent.GetDirectories("root")[0].FullName)
+            //    {
+            //        MessageBox.Show("You cant delete the root");
+            //        return;
+            //    }
 
-                Directory.Delete(path,true);
-            }
+            //    Directory.Delete(path,true);
+            //}
 
-            isDeletedOrCreated = true;
-            MainListBox.Items.Clear();
-            DirectoryInfo root = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.GetDirectories("root")[0];
-            Explore(root);
+            //isDeletedOrCreated = true;
+            //MainListBox.Items.Clear();
+            //DirectoryInfo root = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.GetDirectories("root")[0];
+          //  Explore(root);
 
         }
 
-        private  void MainListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void MainListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
             if (isDeletedOrCreated)
             {
                 isDeletedOrCreated = false;
                 return;
             }
-
             if (MainListBox.SelectedItem == null)
             {
                 return;
@@ -224,15 +249,23 @@ namespace ClientSide
             ListBoxItem item = MainListBox.SelectedItem as ListBoxItem;
             ListItemControl currentItem = item.Content as ListItemControl;
 
-            string path = (item.Content as ListItemControl).fullPath;
-
             if (currentItem.typeOfItem == TypeOfItem.File)
             {
-                    FileStream file = new FileStream(path, FileMode.Open);
-                    StreamReader reader = new StreamReader(file);
-                    MainTextBox.Text = reader.ReadToEnd();
-                    reader.Close();
-                    file.Close();
+                HttpResponseMessage message;
+                Uri address = new Uri("http://localhost:50446/Main/");
+
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                //-------------------- Creating content and passing
+                Model model = new Model() { path = currentItem.relativePath };
+                var stringContent = new StringContent(jss.Serialize(model), Encoding.UTF8, "application/json");
+
+                message = await client.PostAsync(address, stringContent);
+                string responseText = await message.Content.ReadAsStringAsync();
+
+                string contentOfFile = jss.Deserialize<string>(responseText);
+                MainTextBox.Text = contentOfFile;
             }
             else
             {

@@ -28,7 +28,7 @@ namespace ClientSide
     public partial class ListItemControl : UserControl
     {
         public TypeOfItem typeOfItem { get; set; }
-        public string fullPath { get; set; }
+        public string relativePath { get; set; }
         public ListItemControl()
         {
             

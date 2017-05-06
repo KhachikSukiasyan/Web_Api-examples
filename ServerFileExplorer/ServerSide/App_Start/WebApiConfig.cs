@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
+using System.IO;
 
 namespace ServerSide
 {
@@ -16,9 +17,28 @@ namespace ServerSide
 
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
-                routeTemplate: "api/{controller}/{id}",
-                defaults: new { id = RouteParameter.Optional }
-            );
+                routeTemplate: "{controller}/{model}",
+                defaults: new {
+                    model = RouteParameter.Optional          
+                });
         }
+
+        //static void CreateRootFolder()
+        //{
+        //    string s = Directory.GetCurrentDirectory();
+
+        //    DirectoryInfo[] projectDirectorysFolders = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.GetDirectories();
+        //    bool contains = false;
+        //    foreach (DirectoryInfo item in projectDirectorysFolders)
+        //    {
+        //        if (item.Name == "root")
+        //            contains = true;
+        //    }
+        //    if (!contains)
+        //    {
+        //        DirectoryInfo projectDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent;
+        //        projectDirectory.CreateSubdirectory("root");
+        //    }
+        //}
     }
 }
