@@ -19,16 +19,20 @@ namespace ClientSide
     /// </summary>
     public partial class CreateFolderWindow : Window
     {
-        public CreateFolderWindow()
+        public delegate void passEnteredInfo(string info);
+        passEnteredInfo mainDelegate;
+
+        public CreateFolderWindow(passEnteredInfo del)
         {
+            mainDelegate = del;
             InitializeComponent();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-
+            mainDelegate(FolderTextBox.Text);
+            Close();
         }
-
 
     }
 }

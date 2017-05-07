@@ -6,10 +6,16 @@ using System.Threading.Tasks;
 
 namespace ClientSide.Models
 {
-    class Model
+    public enum Enums
     {
-        public string path { get; set; }
-        public Enums typeOfItem { get; set; }
+        File,
+        Folder
     }
 
+    public enum ActionToDo
+    {
+        Create,
+        Update,
+        Delete
+    }
 }

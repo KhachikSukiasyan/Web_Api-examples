@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-
+using ClientSide.Models;
 namespace ClientSide
 {
     /// <summary>
@@ -20,14 +20,10 @@ namespace ClientSide
     /// </summary>
     /// 
 
-    public enum TypeOfItem
-    {
-        File,
-        Folder
-    }
+
     public partial class ListItemControl : UserControl
     {
-        public TypeOfItem typeOfItem { get; set; }
+        public Enums typeOfItem { get; set; }
         public string relativePath { get; set; }
         public ListItemControl()
         {

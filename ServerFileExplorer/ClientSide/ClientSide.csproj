@@ -93,7 +93,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\CreateDeleteUpdateModel.cs" />
     <Compile Include="Models\Model.cs" />
+    <Compile Include="Models\Enums.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

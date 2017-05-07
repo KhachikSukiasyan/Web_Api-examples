@@ -31,21 +31,32 @@ namespace ClientSide
     public partial class MainWindow : Window
     {
         static HttpClient client = new HttpClient();
-        bool isDeletedOrCreated = false;
+
+        Uri address = new Uri("http://localhost:50446/Main/");
         static JavaScriptSerializer jss = new JavaScriptSerializer();
         string[] UnorderedResult;
         ListBoxItem lbi;
         ListItemControl lic;
-
+        HttpResponseMessage message;
         public MainWindow()
         {
             InitializeComponent();
         }
 
-        protected async override void OnInitialized(EventArgs e)
+        protected  override void OnInitialized(EventArgs e)
         {
             base.OnInitialized(e);
 
+            AddRoot();
+            //-------------------- Configuring Httpclient
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            Explore();
+        }
+
+        private void AddRoot()
+        {
             //-------------------- Adding root folder on start
             lbi = new ListBoxItem();
             lic = new ListItemControl();
@@ -53,15 +64,15 @@ namespace ClientSide
             lbi.Content = lic;
             lic.itemImage.Source = new BitmapImage(new Uri("//application:,,,/Resources/folder.png", UriKind.Relative));
             lic.itemText.Text = "root";
-            lic.typeOfItem = TypeOfItem.Folder;
-            
+            lic.typeOfItem = Enums.Folder;
             MainListBox.Items.Add(lbi);
+        }
 
-            //--------------------Sending GET query
-            HttpResponseMessage message;
-            Uri address = new Uri("http://localhost:50446/Main");
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        private async void Explore()
+        {
+            MainListBox.Items.Clear();
+            AddRoot();
+            //--------------------Sending GET query,retrieving All data from server
 
             message = await client.GetAsync(address);
             string responseText = await message.Content.ReadAsStringAsync();
@@ -70,27 +81,25 @@ namespace ClientSide
 
             foreach (string item in UnorderedResult)
             {
-                 lbi = new ListBoxItem();
-                 lic = new ListItemControl();
-                
+                lbi = new ListBoxItem();
+                lic = new ListItemControl();
+
                 lic.itemText.Text = item.Split('\\').Last();
                 lic.Margin = new Thickness(lic.Margin.Left + Deepness(item) * 10, lic.Margin.Top, lic.Margin.Right, lic.Margin.Bottom);
                 lic.relativePath = item;
                 if (IsFile(item))
                 {
                     lic.itemImage.Source = new BitmapImage(new Uri("//application:,,,/Resources/text.png", UriKind.Relative));
-                    lic.typeOfItem = TypeOfItem.File;
+                    lic.typeOfItem = Enums.File;
                 }
                 else
                 {
                     lic.itemImage.Source = new BitmapImage(new Uri("//application:,,,/Resources/folder.png", UriKind.Relative));
-                    lic.typeOfItem = TypeOfItem.Folder;
+                    lic.typeOfItem = Enums.Folder;
                 }
                 lbi.Content = lic;
                 MainListBox.Items.Add(lbi);
-            } 
-
-            //--------------------
+            }
         }
 
         private bool IsFile(string path)
@@ -111,136 +120,142 @@ namespace ClientSide
             return path.Split('\\').Length;
         }
 
+        // -------------- Button handlers
 
-
-        //NOTE: some button handlers use this
-        //private string ClickHelper()
-        //{
-        //    ListBoxItem item = MainListBox.SelectedItem as ListBoxItem;
-        //    ListItemControl currentItem = item.Content as ListItemControl;
-
-        //    string path = (item.Content as ListItemControl).fullPath;
-
-        //    if (currentItem.typeOfItem == TypeOfItem.File)
-        //    {
-        //        int i;
-        //        for (i = path.Length - 1; i > 0; i--)
-        //        {
-        //            if (path[i] == '\\')
-        //                break;
-        //        }
-        //        path = path.Substring(0, i);
-        //    }
-        //    return path;
-        //}
-        //Button handlers
-        private  void CreateFile_Click(object sender, RoutedEventArgs e)
+        private async void CreateFile_Click(object sender, RoutedEventArgs e)
         {
-            //if (MainListBox.SelectedItem != null)
-            //{
-            //    string selectedItemPath = ClickHelper();
-            //    FileStream fStream =  File.Create(selectedItemPath + '\\' + "text.txt");
-            //    fStream.Close();
+            if (MainListBox.SelectedItem != null)
+            {
+                string FileName = string.Empty;
 
-            //    isDeletedOrCreated = true;
-            //    MainListBox.Items.Clear();
-            //    DirectoryInfo root = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.GetDirectories("root")[0];
-            // //   Explore(root);
-            //}
-            //else
-            //{
-            //    MessageBox.Show("Select directory in Browser");
-            //}
+                CreateFileWindow createFileWindow = new CreateFileWindow(s => { FileName = s; });
+                createFileWindow.ShowDialog();
+
+                ListBoxItem item = MainListBox.SelectedItem as ListBoxItem;
+                ListItemControl currentItem = item.Content as ListItemControl;
+
+                
+                CreateDeleteUpdateModel model = new CreateDeleteUpdateModel()
+                { path = currentItem.relativePath,
+                    typeOfItemSelected = currentItem.typeOfItem,
+                    typeOfItemToChange = Enums.File,
+                    newItemName = FileName,
+                    action = ActionToDo.Create
+                };
+
+                var stringContent = new StringContent(jss.Serialize(model), Encoding.UTF8, "application/json");
+                await client.PutAsync(address, stringContent);
+
+                Explore();
+            }
+            else
+            {
+                MessageBox.Show("Select anything in Browser");
+            }
         }
 
-        private  void CreateFolder_Click(object sender, RoutedEventArgs e)
+        private async void CreateFolder_Click(object sender, RoutedEventArgs e)
         {
-            //if (MainListBox.SelectedItem != null)
-            //{           
-            //  //  string selectedItemPath = ClickHelper();
+            if (MainListBox.SelectedItem != null)
+            {
+                string FolderName = string.Empty;
 
-            //    DirectoryInfo dir = new DirectoryInfo(selectedItemPath);
+                CreateFolderWindow createFileWindow = new CreateFolderWindow(s => { FolderName = s; });
+                createFileWindow.ShowDialog();
 
-            //    dir.CreateSubdirectory("newDirectory");
+                ListBoxItem item = MainListBox.SelectedItem as ListBoxItem;
+                ListItemControl currentItem = item.Content as ListItemControl;
 
-            //    isDeletedOrCreated = true;
-            //    MainListBox.Items.Clear();
-            //    DirectoryInfo root = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.GetDirectories("root")[0];
-            //  //  Explore(root);
+               
+                CreateDeleteUpdateModel model = new CreateDeleteUpdateModel()
+                {
+                    path = currentItem.relativePath,
+                    typeOfItemSelected = currentItem.typeOfItem,
+                    typeOfItemToChange = Enums.Folder,
+                    newItemName = FolderName,
+                    action = ActionToDo.Create
+                };
 
-            //}
-            //else
-            //{
-            //    MessageBox.Show("Select anything in Browser");
-            //}
+                var stringContent = new StringContent(jss.Serialize(model), Encoding.UTF8, "application/json");
+                await client.PutAsync(address, stringContent);
 
+                Explore();
+            }
+            else
+            {
+                MessageBox.Show("Select anything in Browser");
+            }
         }
 
-        private  void Update_Click(object sender, RoutedEventArgs e)
+        private async void Update_Click(object sender, RoutedEventArgs e)
         {
-            //if (MainListBox.SelectedItem != null)
-            //{
-            //    ListBoxItem item = MainListBox.SelectedItem as ListBoxItem;
-            //    ListItemControl currentItem = item.Content as ListItemControl;
-            //  //  string path = (item.Content as ListItemControl).fullPath;
+            if (MainListBox.SelectedItem != null)
+            {
+                ListBoxItem item = MainListBox.SelectedItem as ListBoxItem;
+                ListItemControl currentItem = item.Content as ListItemControl;
 
-            //    if (currentItem.typeOfItem == TypeOfItem.File)
-            //    {
-                    
-            //       FileStream file = new FileStream(path, FileMode.Open);
-            //       StreamWriter writer = new StreamWriter(file);
-            //       writer.Write(MainTextBox.Text);
-            //       writer.Close();
-            //       file.Close();
-                    
-            //    }
-            //    else
-            //    {
-            //        MessageBox.Show("Select file in Browser");
-            //    }
-            //}
-            //else
-            //{
-            //    MessageBox.Show("Select anything in Browser");
-            //}
+                if (currentItem.typeOfItem == Enums.File)
+                {
+                    string FileName = string.Empty;
+                   
+                    CreateDeleteUpdateModel model = new CreateDeleteUpdateModel()
+                    {
+                        path = currentItem.relativePath,
+                        contentToWrite = MainTextBox.Text,
+                        action = ActionToDo.Update
+                    };
+
+                    var stringContent = new StringContent(jss.Serialize(model), Encoding.UTF8, "application/json");
+                    await client.PutAsync(address, stringContent);
+
+                    Explore();
+                }
+                else
+                {
+                    MessageBox.Show("Select file in Browser");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Select anything in Browser");
+            }
         }
 
-        private  void Delete_Click(object sender, RoutedEventArgs e)
+        private async void Delete_Click(object sender, RoutedEventArgs e)
         {
+            if (MainListBox.SelectedItem != null)
+            {
+                ListBoxItem item = MainListBox.SelectedItem as ListBoxItem;
+                ListItemControl currentItem = item.Content as ListItemControl;
+                string path = (item.Content as ListItemControl).relativePath;
 
-            //ListBoxItem item = MainListBox.SelectedItem as ListBoxItem;
-            //ListItemControl currentItem = item.Content as ListItemControl;
-            //string path = (item.Content as ListItemControl).fullPath;
+                if (path == Directory.GetParent(Directory.GetCurrentDirectory()).Parent.GetDirectories("root")[0].FullName)
+                {
+                    MessageBox.Show("You cant delete the root");
+                    return;
+                }
 
-            //if (currentItem.typeOfItem == TypeOfItem.File)
-            //{
-            //    File.Delete(path);
-            //}
-            //else
-            //{
-            //    if (path == Directory.GetParent(Directory.GetCurrentDirectory()).Parent.GetDirectories("root")[0].FullName)
-            //    {
-            //        MessageBox.Show("You cant delete the root");
-            //        return;
-            //    }
+                CreateDeleteUpdateModel model = new CreateDeleteUpdateModel()
+                {
+                    path = currentItem.relativePath,
+                    typeOfItemSelected = currentItem.typeOfItem,
+                    action = ActionToDo.Delete
+                };
 
-            //    Directory.Delete(path,true);
-            //}
+                var stringContent = new StringContent(jss.Serialize(model), Encoding.UTF8, "application/json");
+                await client.PutAsync(address, stringContent);
 
-            //isDeletedOrCreated = true;
-            //MainListBox.Items.Clear();
-            //DirectoryInfo root = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.GetDirectories("root")[0];
-          //  Explore(root);
+                Explore();
+            }
+            else
+            {
+                MessageBox.Show("Select anything in Browser");
+            }
 
         }
 
         private async void MainListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (isDeletedOrCreated)
-            {
-                isDeletedOrCreated = false;
-                return;
-            }
             if (MainListBox.SelectedItem == null)
             {
                 return;
@@ -249,13 +264,8 @@ namespace ClientSide
             ListBoxItem item = MainListBox.SelectedItem as ListBoxItem;
             ListItemControl currentItem = item.Content as ListItemControl;
 
-            if (currentItem.typeOfItem == TypeOfItem.File)
+            if (currentItem.typeOfItem == Enums.File)
             {
-                HttpResponseMessage message;
-                Uri address = new Uri("http://localhost:50446/Main/");
-
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                 //-------------------- Creating content and passing
                 Model model = new Model() { path = currentItem.relativePath };

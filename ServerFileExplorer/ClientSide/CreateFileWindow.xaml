@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ClientSide"
         mc:Ignorable="d"
-        Title="Create File" Height="90" Width="300" ResizeMode="NoResize">
+        Title="Create File" Height="100" Width="300" ResizeMode="NoResize">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20" ></RowDefinition>

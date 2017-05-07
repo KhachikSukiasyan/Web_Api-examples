@@ -5,8 +5,10 @@ using System.Web;
 
 namespace ServerSide.Models
 {
+
     public class Model
     {
         public string path { get; set; }
+        public TypeOfItem typeOfItem { get; set; } 
     }
 }

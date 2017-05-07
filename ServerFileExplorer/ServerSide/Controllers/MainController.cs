@@ -11,21 +11,23 @@ namespace ServerSide.Controllers
 {
     public class MainController : ApiController
     {
-        bool isFirstEnter = true;
-        List<string> content = new List<string>();
-        // GET: api/Main
+        static bool isFirstEnter = true;
+        static List<string> content = new List<string>();
+        
         public string[] Get()
         {
             if (isFirstEnter)
             {
-                // string s = Directory.GetCurrentDirectory();
                 DirectoryInfo projectDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent;
                 DirectoryInfo[] projectDirectorysFolders = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.GetDirectories();
                 bool contains = false;
                 foreach (DirectoryInfo item in projectDirectorysFolders)
                 {
                     if (item.Name == "root")
+                    {
                         contains = true;
+                        break;
+                    }
                 }
                 if (!contains)
                 {
@@ -36,17 +38,16 @@ namespace ServerSide.Controllers
             }
 
             DirectoryInfo root = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.GetDirectories("root")[0];
-            
             return Explore(root);
         }
 
 
-
+        //----------------- Read file content
         public string Post(Model model)
         {
             string FileContent;
             DirectoryInfo projectDirectorysFolders = Directory.GetParent(Directory.GetCurrentDirectory())
-                .Parent.GetDirectories("root").First<DirectoryInfo>();
+                .Parent.GetDirectories("root").First();
 
             string pathOfFile = projectDirectorysFolders.FullName + '\\' + model.path;
 
@@ -60,22 +61,89 @@ namespace ServerSide.Controllers
         }
 
         
-
-
-        // PUT: api/Main/5
-        public void Put(int id, [FromBody]string value)
+        public void Put(CreateDeleteUpdateModel model)
         {
+
+         DirectoryInfo root = Directory.GetParent(Directory.GetCurrentDirectory())
+                .Parent.GetDirectories("root").First();
+
+            string pathToCreateFile;
+            string pathToCreateFolder;
+
+            switch (model.action)
+            {
+                // -------------------------------- CREATE
+                case ActionToDo.Create:
+                    if (model.typeOfItemToChange == TypeOfItem.File)
+                    {
+                        if (model.typeOfItemSelected == TypeOfItem.File)
+                        {
+                            string pathOfSelectedFile = root.FullName + '\\' + model.path;
+                            FileInfo file = new FileInfo(pathOfSelectedFile);
+                            DirectoryInfo containingFolder = file.Directory;
+
+                            pathToCreateFile = containingFolder.FullName + '\\' + model.newItemName + ".txt";
+                        }
+                        else
+                        {
+                            pathToCreateFile = root.FullName + '\\' + model.path + '\\' + model.newItemName + ".txt";
+                        }
+                        FileInfo fi = new FileInfo(pathToCreateFile);
+                        FileStream fs = fi.Create();
+                        fs.Close();
+                    }
+                    else
+                    {
+                        if (model.typeOfItemSelected == TypeOfItem.File)
+                        {
+                            string pathOfSelectedFile = root.FullName + '\\' + model.path;
+                            FileInfo file = new FileInfo(pathOfSelectedFile);
+                            DirectoryInfo containingFolder = file.Directory;
+
+                            pathToCreateFolder = containingFolder.FullName;
+                        }
+                        else
+                        {
+                            pathToCreateFolder = root.FullName + '\\' + model.path;
+                        }
+
+                        DirectoryInfo dir = new DirectoryInfo(pathToCreateFolder);
+                        dir.CreateSubdirectory(model.newItemName);
+                    }
+
+                    break;
+                // -------------------------------- UPDATE
+                case ActionToDo.Update:
+                    {
+                        string pathOfSelectedFile = root.FullName + '\\' + model.path;
+
+                        FileStream filestream = new FileStream(pathOfSelectedFile, FileMode.Open);
+                        StreamWriter writer = new StreamWriter(filestream);
+                        writer.Write(model.contentToWrite);
+                        writer.Close();
+                        filestream.Close();
+                    }
+                    break;
+                // -------------------------------- DELETE
+                case ActionToDo.Delete:
+                    {
+                        string selectedItemPath = root.FullName + '\\' + model.path;
+                        if (model.typeOfItemSelected == TypeOfItem.Folder)
+                            Directory.Delete(selectedItemPath, true);
+                        else
+                            File.Delete(selectedItemPath);
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
 
-        // DELETE: api/Main/5
-        public void Delete(int id)
-        {
-        }
-
-        //------------------------------- retrieve all data
+        //------------------------------- Retrieve all data
         private string[] Explore(DirectoryInfo root)
         {
-           return ExploreHelper(root, 0);
+            content.Clear();
+            return ExploreHelper(root, 0);
         }
 
         private string[] ExploreHelper(DirectoryInfo root, int deepness)
@@ -106,11 +174,9 @@ namespace ServerSide.Controllers
                 {
                     currentFolderRelativePath += spltiiedPath[j];
                 }
-                content.Add(currentFolderRelativePath);
-            }
 
-            for (int i = 0; i < dirs.Length; i++)
-            {
+                content.Add(currentFolderRelativePath);
+
                 ExploreHelper(dirs[i], deepness + 1);
             }
             return content.ToArray();

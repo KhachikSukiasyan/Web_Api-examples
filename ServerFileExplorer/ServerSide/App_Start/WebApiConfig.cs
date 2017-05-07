@@ -22,23 +22,5 @@ namespace ServerSide
                     model = RouteParameter.Optional          
                 });
         }
-
-        //static void CreateRootFolder()
-        //{
-        //    string s = Directory.GetCurrentDirectory();
-
-        //    DirectoryInfo[] projectDirectorysFolders = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.GetDirectories();
-        //    bool contains = false;
-        //    foreach (DirectoryInfo item in projectDirectorysFolders)
-        //    {
-        //        if (item.Name == "root")
-        //            contains = true;
-        //    }
-        //    if (!contains)
-        //    {
-        //        DirectoryInfo projectDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent;
-        //        projectDirectory.CreateSubdirectory("root");
-        //    }
-        //}
     }
 }

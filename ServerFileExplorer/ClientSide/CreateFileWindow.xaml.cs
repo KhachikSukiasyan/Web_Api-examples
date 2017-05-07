@@ -19,14 +19,20 @@ namespace ClientSide
     /// </summary>
     public partial class CreateFileWindow : Window
     {
-        public CreateFileWindow()
+        public delegate void passEnteredInfo(string info);
+        passEnteredInfo mainDelegate;
+
+        public CreateFileWindow(passEnteredInfo del)
         {
+            mainDelegate = del;
             InitializeComponent();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-
+            mainDelegate(FileTextBox.Text);
+            Close();
         }
+
     }
 }
